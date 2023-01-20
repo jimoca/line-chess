@@ -2,7 +2,7 @@ package main
 
 import (
 	"lineChess/conf"
-	chessController "lineChess/handler"
+	chessHandler "lineChess/handler"
 	gameService "lineChess/service"
 	"log"
 
@@ -15,6 +15,6 @@ func main() {
 	config := conf.Conf()
 	var game *chess.Game
 	gs := gameService.NewGameService(game)
-	chessController.NewChessController(engine, gs)
+	chessHandler.NewChessHandler(engine, gs)
 	log.Fatal(engine.Run(config.URL))
 }
