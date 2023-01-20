@@ -16,16 +16,26 @@ func NewWsHandler(engine *gin.Engine, ws domain.Websocket) {
 	handler := &wsHandler{
 		ws: ws,
 	}
+	pool := websocket.NewPool()
+	go pool.Start()
 
-	socket := engine.Group("/socket")
-	socket.GET("", handler.wsHandler)
+	engine.GET("/socket", func(ctx *gin.Context) {
+		handler.wsHandler(pool, ctx)
+	})
 }
 
-func (wsHandler *wsHandler) wsHandler(ctx *gin.Context) {
-	ws, err := websocket.Upgrade(ctx.Writer, ctx.Request)
+func (wsHandler *wsHandler) wsHandler(pool *websocket.Pool, ctx *gin.Context) {
+	fmt.Println("WebSocket Endpoint Hit")
+	conn, err := websocket.Upgrade(ctx.Writer, ctx.Request)
 	if err != nil {
-		fmt.Fprintf(ctx.Writer, "%+V\n", err)
+		fmt.Fprintf(ctx.Writer, "%+v\n", err)
 	}
-	go websocket.Writer(ws)
-	websocket.Reader(ws)
+
+	client := &websocket.Client{
+		Conn: conn,
+		Pool: pool,
+	}
+
+	pool.Register <- client
+	client.Read()
 }
