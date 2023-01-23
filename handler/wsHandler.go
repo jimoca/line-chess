@@ -3,7 +3,7 @@ package handler
 import (
 	"fmt"
 	"lineChess/domain"
-	"lineChess/pkg/websocket"
+	"lineChess/pkg/ws"
 
 	"github.com/gin-gonic/gin"
 )
@@ -12,11 +12,11 @@ type wsHandler struct {
 	ws domain.Websocket
 }
 
-func NewWsHandler(engine *gin.Engine, ws domain.Websocket) {
+func NewWsHandler(engine *gin.Engine, dws domain.Websocket) {
 	handler := &wsHandler{
-		ws: ws,
+		ws: dws,
 	}
-	pool := websocket.NewPool()
+	pool := ws.NewPool()
 	go pool.Start()
 
 	engine.GET("/socket", func(ctx *gin.Context) {
@@ -24,14 +24,14 @@ func NewWsHandler(engine *gin.Engine, ws domain.Websocket) {
 	})
 }
 
-func (wsHandler *wsHandler) wsHandler(pool *websocket.Pool, ctx *gin.Context) {
+func (wsHandler *wsHandler) wsHandler(pool *ws.Pool, ctx *gin.Context) {
 	fmt.Println("WebSocket Endpoint Hit")
-	conn, err := websocket.Upgrade(ctx.Writer, ctx.Request)
+	conn, err := ws.Upgrade(ctx.Writer, ctx.Request)
 	if err != nil {
 		fmt.Fprintf(ctx.Writer, "%+v\n", err)
 	}
 
-	client := &websocket.Client{
+	client := &ws.Client{
 		Conn: conn,
 		Pool: pool,
 	}
