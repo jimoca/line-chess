@@ -1,6 +1,9 @@
 package ws
 
-import "fmt"
+import (
+	"fmt"
+	"lineChess/service"
+)
 
 type Pool struct {
 	Register   chan *Client
@@ -19,6 +22,8 @@ func NewPool() *Pool {
 }
 
 func (pool *Pool) Start() {
+	game := service.NewGameSocket()
+	go game.NewGame()
 	for {
 		select {
 		case client := <-pool.Register:
@@ -38,6 +43,7 @@ func (pool *Pool) Start() {
 			break
 		case message := <-pool.Broadcast:
 			fmt.Println("Sending message to all clients in Pool")
+			game.MoveStr <- message.Body
 			for client := range pool.Clients {
 				if err := client.Conn.WriteJSON(message); err != nil {
 					fmt.Println(err)

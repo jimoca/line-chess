@@ -2,20 +2,16 @@ package handler
 
 import (
 	"fmt"
-	"lineChess/domain"
 	"lineChess/pkg/ws"
 
 	"github.com/gin-gonic/gin"
 )
 
 type wsHandler struct {
-	ws domain.Websocket
 }
 
-func NewWsHandler(engine *gin.Engine, dws domain.Websocket) {
-	handler := &wsHandler{
-		ws: dws,
-	}
+func WsHandler(engine *gin.Engine) {
+	handler := &wsHandler{}
 	pool := ws.NewPool()
 	go pool.Start()
 
