@@ -7,13 +7,20 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis"
 )
 
 func main() {
-	engine := gin.Default()
 	config := conf.Conf()
+	engine := gin.Default()
+
+	redisDB := redis.NewClient(&redis.Options{
+		Addr:     config.DB_HOST_PORT,
+		Password: config.DB_PASSWORD,
+		DB:       0,
+	})
 	gs := gameService.NewGameService()
 	handler.ApiHandler(engine, gs)
-	handler.WsHandler(engine)
+	handler.WsHandler(engine, redisDB)
 	log.Fatal(engine.Run(config.URL))
 }
